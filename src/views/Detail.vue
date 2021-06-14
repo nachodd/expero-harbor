@@ -1,13 +1,17 @@
 <template>
   <div class="container mt-3">
     <div class="row">
-      <div class="col-sm-4 text-left">
-        <h4><span class="text-primary">Port map</span> > {{ harbor.name }}</h4>
+      <div class="col-sm-4 text-left" v-if="harbor">
+        <h4><span class="text-primary">Port map</span> > {{ harborName }}</h4>
 
         <div class="mt-3">
-          <h3>{{ harbor.name }}</h3>
+          <h3>{{ harborName }}</h3>
           <div>
-            🌎 <a target="_blank" :href="'http://' + harbor.website">{{ harbor.website }}</a>
+            🌎
+            <a v-if="harbor.website" target="_blank" :href="'http://' + harbor.website">
+              {{ harbor.website }}
+            </a>
+            <span v-else class="lack">[no website provided]</span>
           </div>
         </div>
 
@@ -34,39 +38,47 @@
 </template>
 
 <script>
+/* eslint-disable vue/no-reserved-keys */
 import { get } from "vuex-pathify"
+import { initMap } from "@/utils/map"
 import cruiseIcon from "@/assets/icons/icons8-crucero-48.png"
 import portIcon from "@/assets/icons/icons8-port-48.png"
 
 export default {
   name: "Detail",
+  data() {
+    return {
+      _map: null,
+      _icon: null,
+      _iconLayer: null,
+      harbor: null
+    }
+  },
   computed: {
-    harbor: get("harborSelected")
+    // harbor: get("harborSelected"),
+    pc: get("pc"),
+    harborName() {
+      return (this.harbor && this.harbor.name) || "[NO NAME]"
+    },
+    harborType() {
+      return this.harbor && this.harbor.name.charAt(0).toUpperCase() + this.harbor.name.slice(1)
+    }
   },
   mounted() {
-    if (!this.harbor) {
+    this.harbor = null
+    if (!this.$route.params.id) {
       this.$router.replace("/")
       return
     }
-    const START_LATLNG = [this.harbor.latitude, this.harbor.longitude]
-    const START_ZOOM = 7 //this.harbor.natlScale
+    const id = this.$route.params.id
+    const harbor = this.pc.find(h => Number(h.id) === Number(id))
+    if (!harbor) {
+      this.$router.replace("/")
+      return
+    }
+    this.harbor = harbor
 
-    // Initialize the Leaflet map
-    const element = this.$refs.map
-
-    this._map = L.map(element, { trackResize: false }).setView(START_LATLNG, START_ZOOM)
-
-    // Add the basemap tile layer
-    L.tileLayer("https://api.mapbox.com/styles/v1/{id}/{z}/{x}/{y}?access_token={accessToken}", {
-      attribution:
-        'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
-        '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>' +
-        ', Imagery © <a href="http://mapbox.com">Mapbox</a>',
-      maxZoom: 18,
-      id: "mapbox/satellite-streets-v10/tiles/256",
-      accessToken:
-        "pk.eyJ1IjoiYnJhbmRvbmRldiIsImEiOiJjajFwNjNmODAwMDBnMzFwbDJ4N21yZmFmIn0.YC44JxjiM36-I54e-hVQUA"
-    }).addTo(this._map)
+    this._map = initMap(this.$refs.map, this.harbor.latitude, this.harbor.longitude)
 
     this._iconLayer = new L.LayerGroup()
     this._map.addLayer(this._iconLayer)
@@ -82,7 +94,6 @@ export default {
         iconUrl: this.harbor.type === "cruise" ? cruiseIcon : portIcon,
         iconSize: [25, 25],
         iconAnchor: [25, 25]
-        // popupAnchor: [50, -25],
       })
 
       this._iconLayer.clearLayers()
@@ -91,6 +102,7 @@ export default {
       })
       this._iconLayer.addLayer(marker)
 
+      // Move the map
       this._map.panTo({ lat: this.harbor.latitude, lng: this.harbor.longitude })
     }
   }
@@ -99,12 +111,17 @@ export default {
 
 <style scoped>
 .def {
-  color: #ccc;
+  color: #999;
+  font-weight: bold;
+}
+.lack {
+  font-style: italic;
 }
 .map {
-  height: 250px;
+  height: 300px;
   margin: 0px;
   max-width: unset;
-  width: 250px;
+  width: 300px;
+  box-shadow: 0px 0px 6px 3px rgba(0, 0, 0, 0.67);
 }
 </style>

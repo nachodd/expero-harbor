@@ -1,4 +1,4 @@
-import ports from './data/ports'
+import ports from "./data/ports"
 
 /**
  * Will return a list of all ports
@@ -11,32 +11,34 @@ import ports from './data/ports'
  *                                      set is required in order to filter
  *
  */
-function getPorts (req, res) {
+function getPorts(req, res) {
   let result = ports
 
-  const byBounds = (req.query.minlat && req.query.maxlat && req.query.minlon && req.query.maxlat)
+  const byBounds = req.query.minlat && req.query.maxlat && req.query.minlon && req.query.maxlat
 
   if (byBounds) {
-    result = result.filter((port) => {
+    result = result.filter(port => {
       const minlat = parseFloat(req.query.minlat)
       const maxlat = parseFloat(req.query.maxlat)
       const minlon = parseFloat(req.query.minlon)
       const maxlon = parseFloat(req.query.maxlon)
 
-      return (port.latitude >= minlat && port.latitude <= maxlat) &&
-        (port.longitude >= minlon && port.longitude <= maxlon)
+      return (
+        port.latitude >= minlat &&
+        port.latitude <= maxlat &&
+        port.longitude >= minlon &&
+        port.longitude <= maxlon
+      )
     })
   }
 
   if (req.query.type) {
-    result = result.filter((port) => {
-      return (req.query.type) ? (port.type === req.query.type) : true
+    result = result.filter(port => {
+      return req.query.type ? port.type === req.query.type : true
     })
   }
 
   return result
 }
 
-export {
-  getPorts
-}
+export { getPorts }

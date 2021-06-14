@@ -33,7 +33,11 @@
         >
           <img class="harbor__icon" :src="getIcon(harbor.type)" />
           <span class="harbor__text">{{ harbor.name }}</span>
-          <span class="harbor__icon-container" title="Open detail..." @click="redirect">
+          <span
+            class="harbor__icon-container"
+            title="Open detail..."
+            @click.stop="redirect(harbor)"
+          >
             <img
               class="harbor__icon harbor__icon-detail"
               src="../assets/icons/icons8-zoom-in-64.png"
@@ -67,9 +71,9 @@ export default {
   watch: {
     harborSelected(h) {
       if (h && h.id) {
-        document
-          .querySelector(`[data-id='${h.id}']`)
-          .scrollIntoView({ block: "center", inline: "center", behavior: "smooth" })
+        const element = document.querySelector(`[data-id='${h.id}']`)
+
+        element && element.scrollIntoView({ block: "center", inline: "center", behavior: "smooth" })
       }
     }
   },
@@ -78,18 +82,22 @@ export default {
       if (!this.harborSelected) {
         return false
       }
-      // const { id: undefined } = this.harborSelected
       return harbor.id === this.harborSelected.id
     },
     getIcon(type) {
       return type === "cruise" ? cruiseIcon : portIcon
     },
     selectHarbor(harbor) {
+      // If it is on detail view and click on the list, REDIRECT
+      if (this.$route.name === "Detail") {
+        this.redirect(harbor)
+        return
+      }
       this.harborSelected = harbor
     },
-    redirect() {
-      this.$router.push(`/${this.harborSelected.id}`)
-      // console.log("HOLA!", harborId)
+    redirect(harbor) {
+      this.harborSelected = harbor
+      this.$router.push(`/${this.harborSelected.id}`).catch(e => e)
     }
   }
 }

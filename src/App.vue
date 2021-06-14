@@ -1,21 +1,6 @@
 <template>
   <div id="app">
-    <b-navbar toggleable="md" type="dark" variant="dark" fixed="top">
-      <b-container fluid class="nav">
-        <b-button variant="outline" @click="toggleSidebar">
-          <span class="navbar-toggler-icon"></span>
-        </b-button>
-        &nbsp; &nbsp; &nbsp;
-        <b-navbar-brand tag="span">
-          <b-input-group size="sm">
-            <b-input-group-prepend>
-              <b-button text="🔎" variant="primary">🔎</b-button>
-            </b-input-group-prepend>
-            <b-form-input size="sm" class="search-input" placeholder="Search Ports..." />
-          </b-input-group>
-        </b-navbar-brand>
-      </b-container>
-    </b-navbar>
+    <Navbar />
     <div class="wrapper">
       <Sidebar :opened="sidebarClosed" />
       <div class="content" :class="{ active: sidebarClosed }">
@@ -26,24 +11,18 @@
 </template>
 
 <script>
-// import PortMap from "@/components/PortMap"
 import Sidebar from "@/components/Sidebar.vue"
-import { sync } from "vuex-pathify"
+import Navbar from "@/components/Navbar.vue"
+import { get } from "vuex-pathify"
 
 export default {
   name: "Home",
   components: {
-    Sidebar
+    Sidebar,
+    Navbar
   },
   computed: {
-    sidebarClosed: sync("sidebarClosed")
-  },
-  methods: {
-    toggleSidebar() {
-      this.sidebarClosed = !this.sidebarClosed
-
-      // this.$refs.portmap.sidebarToggled()
-    }
+    sidebarClosed: get("sidebarClosed")
   }
 }
 </script>
@@ -56,10 +35,6 @@ export default {
   text-align: center;
   color: #2c3e50;
   margin-top: 60px;
-}
-
-.nav {
-  justify-content: flex-start;
 }
 
 .wrapper {
@@ -75,6 +50,7 @@ export default {
   top: 56px;
   bottom: 100px;
   right: 0;
+  background-color: #cfd9df;
 }
 
 .content.active {
@@ -88,16 +64,8 @@ export default {
   .content.active {
     width: calc(100% - 290px);
   }
-  /* #sidebarCollapse span {
-    display: none;
-  } */
 }
-.list-group-item.active {
-  z-index: 2;
-  color: #117888;
-  background-color: #bbeff7;
-  border-color: #fff;
-}
+
 .search-input::placeholder {
   color: #ccc;
   font-style: italic;
