@@ -24,8 +24,11 @@
       <div class="col-sm-3">
         <div class="map" ref="map"></div>
       </div>
-
-      {{ harbor }}
+    </div>
+    <div class="row mt-5">
+      <div class="col-sm-12 text-left">
+        <router-link to="/"> &#8617; Back</router-link>
+      </div>
     </div>
   </div>
 </template>
